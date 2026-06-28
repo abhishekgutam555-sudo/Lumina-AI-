@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Lumina AI • Creator Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<style>
+:root{
+  --bg:#0d0b08;
+  --card:rgba(22,18,12,.92);
+  --text:#f2ead8;
+  --text2:#a89470;
+  --muted:#5c4f36;
+  --border:rgba(184,146,42,.18);
+  --border2:rgba(184,146,42,.08);
+  --gold:#c9a84c;
+  --gold2:#e8c46a;
+  --gold3:#f5d98a;
+  --goldGlow:rgba(201,168,76,.22);
+  --red:#ff5656;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+
+/* grain */
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");background-size:180px;pointer-events:none;z-index:0;opacity:.4;}
+
+/* glow orbs */
+.orb{position:fixed;border-radius:50%;filter:blur(120px);pointer-events:none;z-index:0;animation:drift 18s ease-in-out infinite alternate;}
+.orb.a{width:550px;height:550px;top:-180px;left:-120px;background:radial-gradient(circle,rgba(201,168,76,.09),transparent 65%);}
+.orb.b{width:450px;height:450px;bottom:-120px;right:-80px;background:radial-gradient(circle,rgba(201,168,76,.07),transparent 65%);animation-delay:-9s;}
+@keyframes drift{from{transform:translate(0,0) scale(1);}to{transform:translate(35px,25px) scale(1.08);}}
+
+.wrap{max-width:1100px;margin:auto;padding:22px 24px;position:relative;z-index:1;}
+
+/* header */
+header{display:flex;justify-content:space-between;align-items:center;padding:14px 0 22px;border-bottom:1px solid var(--border2);animation:fadeDown .6s ease both;}
+.brand{display:flex;align-items:center;gap:13px;}
+.mark{width:44px;height:44px;border-radius:13px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#0d0b08;font-weight:900;font-size:1.2rem;box-shadow:0 0 22px var(--goldGlow);animation:pulse 3s ease-in-out infinite;}
+@keyframes pulse{0%,100%{box-shadow:0 0 22px var(--goldGlow);}50%{box-shadow:0 0 32px rgba(201,168,76,.45);}}
+.brand-name{font-size:2rem;font-family:'Cormorant Garamond',serif;font-weight:700;background:linear-gradient(120deg,var(--gold),var(--gold3),var(--gold));background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:shimmer 4s linear infinite;}
+@keyframes shimmer{0%{background-position:0% center;}100%{background-position:200% center;}}
+.brand-sub{font-size:.72rem;color:var(--muted);letter-spacing:.05em;margin-top:2px;}
+.badge{padding:7px 14px;border:1px solid var(--border);border-radius:100px;font-size:.75rem;color:var(--text2);letter-spacing:.08em;}
+
+/* home */
+#homeScreen{animation:fadeUp .55s ease both;}
+.hero{text-align:center;padding:64px 0 36px;}
+.hero-label{display:inline-block;padding:5px 16px;border:1px solid var(--border);border-radius:100px;font-size:.73rem;color:var(--gold2);letter-spacing:.14em;text-transform:uppercase;margin-bottom:22px;animation:fadeUp .5s .1s ease both;}
+.hero-title{font-size:3.7rem;font-family:'Cormorant Garamond',serif;font-weight:700;line-height:1.1;margin-bottom:18px;animation:fadeUp .5s .18s ease both;}
+.hero-title em{font-style:italic;background:linear-gradient(120deg,var(--gold),var(--gold3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hero-sub{color:var(--text2);max-width:500px;margin:auto;line-height:1.8;font-size:.97rem;font-weight:300;animation:fadeUp .5s .26s ease both;}
+
+/* grid */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:18px;margin-top:44px;}
+.card{background:var(--card);border-radius:20px;padding:24px;cursor:pointer;border:1px solid var(--border2);position:relative;overflow:hidden;transition:transform .32s cubic-bezier(.34,1.56,.64,1),border-color .3s,box-shadow .3s;opacity:0;animation:cardIn .5s ease forwards;}
+.card::after{content:'';position:absolute;top:0;left:-100%;width:55%;height:100%;background:linear-gradient(90deg,transparent,rgba(201,168,76,.07),transparent);transition:left .5s ease;}
+.card:hover{transform:translateY(-7px) scale(1.02);border-color:rgba(201,168,76,.32);box-shadow:0 22px 44px rgba(0,0,0,.5),0 0 0 1px rgba(201,168,76,.1),0 6px 20px var(--goldGlow);}
+.card:hover::after{left:140%;}
+.card:nth-child(1){animation-delay:.05s}.card:nth-child(2){animation-delay:.1s}.card:nth-child(3){animation-delay:.15s}.card:nth-child(4){animation-delay:.2s}.card:nth-child(5){animation-delay:.25s}.card:nth-child(6){animation-delay:.3s}.card:nth-child(7){animation-delay:.35s}
+@keyframes cardIn{from{opacity:0;transform:translateY(26px) scale(.96);}to{opacity:1;transform:translateY(0) scale(1);}}
+.icon{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,rgba(201,168,76,.12),rgba(201,168,76,.05));font-size:1.4rem;margin-bottom:16px;border:1px solid rgba(201,168,76,.14);transition:transform .3s,box-shadow .3s;}
+.card:hover .icon{transform:scale(1.1) rotate(-4deg);box-shadow:0 0 14px var(--goldGlow);}
+.cardTitle{font-size:1.15rem;margin-bottom:7px;font-weight:600;}
+.cardDesc{color:var(--muted);line-height:1.5;font-size:.85rem;font-weight:300;}
+.cardArrow{position:absolute;bottom:20px;right:20px;width:28px;height:28px;border-radius:50%;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.14);display:flex;align-items:center;justify-content:center;font-size:.78rem;color:var(--gold2);opacity:0;transform:translateX(-5px);transition:opacity .3s,transform .3s;}
+.card:hover .cardArrow{opacity:1;transform:translateX(0);}
+
+/* tool screen */
+#toolScreen{display:none;margin-top:28px;animation:fadeUp .4s ease both;}
+.backBtn{display:inline-flex;align-items:center;gap:8px;padding:9px 17px;border:1px solid var(--border);border-radius:100px;background:transparent;color:var(--text2);font-size:.83rem;cursor:pointer;transition:border-color .25s,color .25s,background .25s;font-family:'DM Sans',sans-serif;}
+.backBtn:hover{border-color:var(--gold);color:var(--gold2);background:rgba(201,168,76,.06);}
+.toolHeader{margin-top:28px;margin-bottom:5px;}
+#toolName{font-size:2rem;font-family:'Cormorant Garamond',serif;font-weight:700;background:linear-gradient(120deg,var(--text),var(--gold3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.toolLine{height:1px;background:linear-gradient(90deg,var(--border),transparent);margin-bottom:20px;}
+
+textarea{width:100%;min-height:160px;border-radius:16px;border:1px solid var(--border2);padding:20px;margin-top:10px;resize:vertical;font-size:.97rem;background:rgba(15,12,8,.75);color:var(--text);font-family:'DM Sans',sans-serif;font-weight:300;transition:border-color .3s,box-shadow .3s;line-height:1.7;}
+textarea:focus{outline:none;border-color:rgba(201,168,76,.38);box-shadow:0 0 0 3px rgba(201,168,76,.07);}
+textarea::placeholder{color:var(--muted);}
+
+.generateBtn{width:100%;margin-top:16px;padding:16px;border:none;border-radius:14px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#0d0b08;font-size:.97rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;letter-spacing:.02em;position:relative;overflow:hidden;transition:transform .25s cubic-bezier(.34,1.56,.64,1),box-shadow .3s,opacity .3s;}
+.generateBtn:hover:not(:disabled){transform:translateY(-3px) scale(1.01);box-shadow:0 10px 28px rgba(201,168,76,.32);}
+.generateBtn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+
+/* loading */
+#loading{display:none;text-align:center;margin-top:24px;padding:26px;border-radius:16px;border:1px solid var(--border2);background:rgba(15,12,8,.5);}
+.dots{display:flex;justify-content:center;gap:7px;margin-bottom:12px;}
+.dots span{width:7px;height:7px;border-radius:50%;background:var(--gold);animation:bounce 1.3s ease-in-out infinite;}
+.dots span:nth-child(2){animation-delay:.2s;}
+.dots span:nth-child(3){animation-delay:.4s;}
+@keyframes bounce{0%,80%,100%{transform:scale(.65);opacity:.35;}40%{transform:scale(1);opacity:1;}}
+#loadingText{color:var(--text2);font-size:.88rem;font-weight:300;}
+
+/* steps bar */
+#stepsBar{display:none;margin-top:14px;}
+.step{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;margin-bottom:6px;font-size:.83rem;color:var(--muted);transition:all .3s;}
+.step.active{background:rgba(201,168,76,.08);color:var(--gold2);border:1px solid rgba(201,168,76,.15);}
+.step.done{color:#4ade80;}
+.step-dot{width:8px;height:8px;border-radius:50%;background:currentColor;flex-shrink:0;}
+
+/* error */
+#errorBox{display:none;margin-top:16px;padding:14px 18px;background:rgba(255,86,86,.06);border:1px solid rgba(255,86,86,.22);border-radius:12px;color:#ff9090;font-size:.88rem;animation:shakeIn .4s ease;}
+@keyframes shakeIn{0%{transform:translateX(-8px);opacity:0;}50%{transform:translateX(4px);}100%{transform:translateX(0);opacity:1;}}
+
+/* output */
+#output{display:none;margin-top:22px;border-radius:20px;border:1px solid var(--border);overflow:hidden;animation:revealUp .5s cubic-bezier(.34,1.3,.64,1) both;}
+@keyframes revealUp{from{opacity:0;transform:translateY(18px) scale(.98);}to{opacity:1;transform:translateY(0) scale(1);}}
+.outHead{padding:14px 20px;background:linear-gradient(90deg,rgba(201,168,76,.09),rgba(201,168,76,.04));border-bottom:1px solid var(--border2);display:flex;justify-content:space-between;align-items:center;}
+.outHeadL{display:flex;align-items:center;gap:9px;font-size:.83rem;font-weight:600;color:var(--gold2);letter-spacing:.06em;}
+.outDot{width:6px;height:6px;border-radius:50%;background:var(--gold);box-shadow:0 0 7px var(--goldGlow);animation:pulse 2s ease-in-out infinite;}
+.copyBtn{border:1px solid var(--border);padding:6px 13px;border-radius:9px;cursor:pointer;background:transparent;color:var(--text2);font-weight:500;font-size:.78rem;font-family:'DM Sans',sans-serif;transition:border-color .25s,color .25s,background .25s;}
+.copyBtn:hover{border-color:var(--gold);color:var(--gold2);background:rgba(201,168,76,.06);}
+.outBody{padding:26px 28px;line-height:1.9;font-size:.96rem;font-weight:300;color:var(--text);background:rgba(13,11,8,.65);}
+.outBody h1,.outBody h2,.outBody h3{font-family:'Cormorant Garamond',serif;color:var(--gold2);margin:16px 0 9px;font-weight:600;}
+.outBody strong{color:var(--gold3);font-weight:600;}
+.outBody p{margin-bottom:11px;}
+.outBody ul,.outBody ol{padding-left:19px;margin-bottom:11px;}
+.outBody li{margin-bottom:5px;}
+.outBody code{background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.14);border-radius:5px;padding:2px 6px;font-size:.88em;color:var(--gold3);}
+.outBody hr{border:none;border-top:1px solid var(--border2);margin:16px 0;}
+
+/* scrollbar */
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:rgba(201,168,76,.22);border-radius:4px;}
+
+/* animations */
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+@keyframes fadeDown{from{opacity:0;transform:translateY(-14px);}to{opacity:1;transform:translateY(0);}}
+
+@media(max-width:600px){.hero-title{font-size:2.6rem;}.wrap{padding:14px 16px;}.outBody{padding:18px;}}
+</style>
+</head>
+<body>
+
+<div class="orb a"></div>
+<div class="orb b"></div>
+
+<div class="wrap">
+
+  <!-- HEADER -->
+  <header>
+    <div class="brand">
+      <div class="mark">✦</div>
+      <div>
+        <div class="brand-name">Lumina AI</div>
+        <div class="brand-sub">Creator Studio • @Varad</div>
+      </div>
+    </div>
+    <div class="badge">✦ PREMIUM</div>
+  </header>
+
+  <!-- HOME -->
+  <div id="homeScreen">
+    <section class="hero">
+      <div class="hero-label">✦ AI Powered Tools</div>
+      <h1 class="hero-title">Create Content That<br>Feels <em>Premium</em></h1>
+      <p class="hero-sub">Viral scripts, deep news research, facts aur growth — sab ek jagah.</p>
+    </section>
+    <section class="grid" id="toolGrid"></section>
+  </div>
+
+  <!-- TOOL SCREEN -->
+  <div id="toolScreen">
+    <button class="backBtn" onclick="goBack()">← Back to Tools</button>
+    <div class="toolHeader"><h2 id="toolName"></h2></div>
+    <div class="toolLine"></div>
+
+    <textarea id="mainInput" placeholder="Likho..."></textarea>
+
+    <button class="generateBtn" id="generateBtn" onclick="generateAI()">
+      Generate ✦
+    </button>
+
+    <div id="loading">
+      <div class="dots"><span></span><span></span><span></span></div>
+      <div id="loadingText">Soch raha hoon...</div>
+    </div>
+
+    <div id="stepsBar">
+      <div class="step" id="s1"><div class="step-dot"></div><span>📰 Live news fetch kar raha hoon</span></div>
+      <div class="step" id="s2"><div class="step-dot"></div><span>📚 Wikipedia se research</span></div>
+      <div class="step" id="s3"><div class="step-dot"></div><span>🧠 Deep analysis likh raha hoon</span></div>
+    </div>
+
+    <div id="errorBox"></div>
+
+    <div id="output">
+      <div class="outHead">
+        <div class="outHeadL"><div class="outDot"></div>LUMINA AI RESPONSE</div>
+        <button class="copyBtn" onclick="copyText()">📋 Copy</button>
+      </div>
+      <div class="outBody" id="outputBody"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ─── APNI NEW KEYS YAHAN DAALO ───────────────────────────────
+const API_KEY      = "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";   // groq.com se lo
+const NEWS_API_KEY = "7da1b4fbb36792f7198dafd7c33b3c95";   // gnews.io se lo
+// ─────────────────────────────────────────────────────────────
+
+const MODEL = "llama-3.3-70b-versatile";
+
+const TOOLS = [
+  {
+    name:"AI Assistant", emoji:"✦",
+    desc:"Kuch bhi poochho — deep smart jawab",
+    ph:"Apna sawal likho...",
+    prompt:(v)=>`You are Lumina AI, a smart assistant for Indian Instagram creator @Varad(niche: Trending News, Facts, Real Stories). Answer deeply and clearly in Hinglish.\n\nQuestion: ${v}`
+  },
+  {
+    name:"Script Writer", emoji:"🎬",
+    desc:"Viral reel script — hook se CTA tak",
+    ph:"Topic likho (NEET, Gold price, koi news...)",
+    prompt:(v)=>`Write a complete viral reel script for @Varad (Indian news/facts creator).
+
+Topic: ${v}
+
+Format:
+🎬 HOOK (0-3 sec): [Shocking opening line that stops the scroll]
+📢 BODY (4-20 sec): [3-4 punchy fact-based lines in Hinglish]
+💥 SHOCKING FACT: [One surprising insight]
+📣 CTA (last 3 sec): [Strong reason to like/follow/share]
+
+Style: Energetic, conversational Hinglish. Like @Varad content.`
+  },
+  {
+    name:"Reel Ideas", emoji:"▶",
+    desc:"6 viral reel ideas — complete plan",
+    ph:"Niche ya topic likho...",
+    prompt:(v)=>`Generate 6 high-viral Reel ideas for @Varad (Trending News + Facts + Real Stories niche).
+Topic/Niche: ${v}
+
+For each idea give:
+💡 Catchy Title
+🎯 Hook line (first 3 sec)
+📋 Short script outline (4-5 points)
+🎵 Audio/Music type suggestion
+📣 CTA suggestion`
+  },
+  {
+    name:"Hashtag Generator", emoji:"#",
+    desc:"30 best hashtags — perfectly categorized",
+    ph:"Topic likho...",
+    prompt:(v)=>`Generate 30 best Instagram hashtags for this topic: ${v}
+
+Categorize into:
+🔥 Broad (5 hashtags — high reach)
+🎯 Medium (15 hashtags — targeted reach)
+💎 Niche (10 hashtags — low competition, high engagement)
+
+Also: Top 5 evergreen hashtags for @Varad news/facts content.`
+  },
+  {
+    name:"Growth Tips", emoji:"↑",
+    desc:"2026 Instagram growth strategies",
+    ph:"Apna niche batao...",
+    prompt:(v)=>`Give 10 powerful actionable Instagram growth strategies for 2026 for a creator in this niche: ${v}
+
+Cover: Reel strategy, best posting times, engagement tricks, trending audio tips, collab ideas, algorithm hacks.
+Be specific. Answer in Hinglish.`
+  },
+  {
+    name:"Today News", emoji:"📰",
+    desc:"Deep research — live news + analysis",
+    ph:"Topic likho (NEET, Budget, AI, Gold...)",
+    prompt:(v,news,wiki)=>`You are a deep research assistant for Indian Instagram creator @Varad
+
+TOPIC: ${v}
+${news?`\nLIVE NEWS:\n${news}\n`:''}${wiki?`\nBACKGROUND INFO:\n${wiki}\n`:''}
+Give a COMPLETE DEEP RESEARCH REPORT:
+
+📰 KYA HUA? — Latest facts & update
+🔍 KYUN IMPORTANT? — Impact on common Indian people
+📊 KEY NUMBERS — Important stats/data
+😲 SHOCKING ANGLE — Viral worthy insight
+🌍 BIG PICTURE — Broader context/background
+📱 3 REEL IDEAS — Title + hook line for each
+🎯 BEST HOOK LINE — For a viral reel on this topic
+
+Be factual, deep, engaging. Hinglish.`
+  },
+  {
+    name:"Fact Generator", emoji:"📌",
+    desc:"10 shocking facts jo log share karein",
+    ph:"Topic likho (koi bhi)...",
+    prompt:(v)=>`Generate 10 shocking, viral, interesting facts about: ${v}
+
+For each fact:
+📌 Fact — 1-2 lines in Hinglish
+💡 Why it's surprising for Indian audience
+🎬 One-line hook for a reel using this fact
+
+Make facts relatable to Indians. Used for reels by @Varad.`
+  }
+];
+
+let activeTool = null;
+const toolGrid = document.getElementById("toolGrid");
+
+TOOLS.forEach((t,i)=>{
+  toolGrid.innerHTML += `<div class="card" onclick="openTool(${i})">
+    <div class="icon">${t.emoji}</div>
+    <div class="cardTitle">${t.name}</div>
+    <div class="cardDesc">${t.desc}</div>
+    <div class="cardArrow">→</div>
+  </div>`;
+});
+
+const $=id=>document.getElementById(id);
+
+function openTool(i){
+  activeTool=TOOLS[i];
+  $("homeScreen").style.display="none";
+  $("toolScreen").style.display="block";
+  $("toolName").textContent=activeTool.name;
+  $("mainInput").placeholder=activeTool.ph;
+  $("mainInput").value="";
+  resetUI();
+}
+
+function goBack(){
+  $("toolScreen").style.display="none";
+  $("homeScreen").style.display="block";
+}
+
+function resetUI(){
+  $("errorBox").style.display="none";
+  $("output").style.display="none";
+  $("outputBody").innerHTML="";
+  $("stepsBar").style.display="none";
+  ["s1","s2","s3"].forEach(id=>{
+    const el=$(id);
+    el.classList.remove("active","done");
+  });
+}
+
+function setBusy(on,msg){
+  $("generateBtn").disabled=on;
+  $("loading").style.display=on?"block":"none";
+  if(msg) $("loadingText").textContent=msg;
+}
+
+function setStep(n){
+  $("stepsBar").style.display="block";
+  for(let i=1;i<=3;i++){
+    const el=$("s"+i);
+    el.classList.remove("active","done");
+    if(i<n) el.classList.add("done");
+    else if(i===n) el.classList.add("active");
+  }
+}
+
+function setError(msg){
+  $("errorBox").style.display="block";
+  $("errorBox").innerText="⚠ "+msg;
+}
+
+// ── FREE DATA SOURCES ──
+
+async function getGNews(topic){
+  try{
+    const r=await fetch(`https://gnews.io/api/v4/search?q=${encodeURIComponent(topic)}&lang=en&max=5&apikey=${NEWS_API_KEY}`);
+    const d=await r.json();
+    if(!d.articles?.length) return "";
+    return d.articles.map((a,i)=>`${i+1}. ${a.title}\n${a.description||""}`).join("\n\n");
+  }catch(e){return "";}
+}
+
+async function getWiki(topic){
+  try{
+    const r=await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(topic)}`);
+    const d=await r.json();
+    return d.extract?d.extract.slice(0,700):"";
+  }catch(e){return "";}
+}
+
+// ── AI CALL ──
+
+async function callAI(prompt){
+  const fetchP=fetch("https://api.groq.com/openai/v1/chat/completions",{
+    method:"POST",
+    headers:{"Content-Type":"application/json","Authorization":`Bearer ${API_KEY}`},
+    body:JSON.stringify({
+      model:MODEL,
+      messages:[
+        {role:"system",content:"You are Lumina AI — a premium content and research assistant for Indian Instagram creator @Varad (niche: Trending News, Facts, Real Stories). Always respond in Hinglish (Hindi+English). Be factual, energetic and deeply informative."},
+        {role:"user",content:prompt}
+      ],
+      temperature:0.8,
+      max_tokens:1500,
+      stream:false
+    })
+  });
+  const timeoutP=new Promise((_,rej)=>setTimeout(()=>rej(new Error("Timeout — thoda wait karke dobara try karo")),45000));
+  const res=await Promise.race([fetchP,timeoutP]);
+
+  if(!res.ok){
+    let msg=`Error ${res.status}`;
+    try{const e=await res.json();msg=e?.error?.message||msg;}catch(_){}
+    throw new Error(msg);
+  }
+  const data=await res.json();
+  return data.choices?.[0]?.message?.content||"";
+}
+
+// ── MAIN GENERATE ──
+
+async function generateAI(){
+  if(!activeTool) return;
+  const input=$("mainInput").value.trim();
+  if(!input){setError("Pehle kuch likho!");return;}
+
+  resetUI();
+  setBusy(true,"Soch raha hoon...");
+
+  try{
+    let prompt="";
+
+    if(activeTool.name==="Today News"){
+      setStep(1); setBusy(true,"Live news fetch kar raha hoon...");
+      const news=await getGNews(input);
+
+      setStep(2); setBusy(true,"Wikipedia se research kar raha hoon...");
+      const wiki=await getWiki(input);
+
+      setStep(3); setBusy(true,"Deep analysis likh raha hoon...");
+      prompt=activeTool.prompt(input,news,wiki);
+    }else{
+      setBusy(true,"AI likh raha hai... ✍️");
+      prompt=activeTool.prompt(input);
+    }
+
+    const result=await callAI(prompt);
+
+    $("stepsBar").style.display="none";
+    $("output").style.display="block";
+    $("outputBody").innerHTML=marked.parse(result);
+
+  }catch(err){
+    setError(err.message||"Kuch gadbad ho gayi. Dobara try karo.");
+    $("stepsBar").style.display="none";
+  }
+
+  setBusy(false);
+}
+
+function copyText(){
+  const text=$("outputBody").innerText;
+  navigator.clipboard.writeText(text).then(()=>{
+    const btn=document.querySelector(".copyBtn");
+    const orig=btn.textContent;
+    btn.textContent="✅ Copied!";
+    btn.style.color="#4ade80";
+    btn.style.borderColor="#4ade80";
+    setTimeout(()=>{btn.textContent=orig;btn.style.color="";btn.style.borderColor="";},2000);
+  }).catch(()=>{
+    const ta=document.createElement("textarea");
+    ta.value=text;document.body.appendChild(ta);ta.select();
+    document.execCommand("copy");document.body.removeChild(ta);
+    alert("✅ Copied!");
+  });
+}
+</script>
+</body>
+</html>
